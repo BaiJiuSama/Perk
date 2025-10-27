@@ -1,0 +1,7 @@
+/.gradle/
+/build/
+/build/classes/java/main/
+/.kotlin/
+/.idea/
+/jar/
+/gradle/
