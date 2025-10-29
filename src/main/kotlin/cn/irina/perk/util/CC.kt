@@ -2,6 +2,7 @@ package cn.irina.perk.util
 
 import com.google.common.collect.ConcurrentHashMultiset
 import org.bukkit.ChatColor
+import org.bukkit.entity.Player
 import java.util.regex.Pattern
 
 /**
@@ -10,6 +11,9 @@ import java.util.regex.Pattern
  */
 
 object CC {
+    fun send(p: Player, msg: String) = p.sendMessage(color(msg))
+    fun send(p: Player, msg: List<String>) = msg.forEach { send(p, color(it)) }
+    
     fun color(str: String): String = ChatColor.translateAlternateColorCodes('&', translateHexColorCodes(str))
 
     fun color(str: List<String>): List<String> {
@@ -27,7 +31,7 @@ object CC {
         while (matcher.find()) {
             val group = matcher.group(1)
             
-            matcher.apdendReplacement(
+            matcher.appendReplacement(
                 buffer, (colorChar.toString() + "x"
                         + colorChar + group[0] + colorChar + group[1]
                         + colorChar + group[2] + colorChar + group[3]
@@ -35,6 +39,6 @@ object CC {
             )
         }
         
-        return matcher.apdendTail(buffer).toString()
+        return matcher.appendTail(buffer).toString()
     }
 }

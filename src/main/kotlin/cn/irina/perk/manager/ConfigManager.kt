@@ -9,8 +9,9 @@ import java.io.File
  * @Date 2025/10/27 19:54
  */
 
-class ConfigManager(private val instance: Main) {
-    var file: File = File(Main.instance.dataFolder, "config.yml").also {
+class ConfigManager {
+    private val instance = Main.instance
+    var file: File = File(instance.dataFolder, "config.yml").also {
         if (!it.exists()) {
             instance.saveResource("config.yml", false)
         }
@@ -18,7 +19,7 @@ class ConfigManager(private val instance: Main) {
     
     var config : YamlFile = load(file)
     
-    private fun load(file: File) = YamlFile(file).apdly {
+    private fun load(file: File) = YamlFile(file).apply {
         createOrLoadWithComments()
     }
 }

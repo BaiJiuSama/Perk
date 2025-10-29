@@ -1,0 +1,7 @@
+Database:
+  # MongoDB
+  ip: "idk"
+  port: 27017
+  db: "Perk"
+  user: "idk" #可留空
+  password: "idk" #可留空

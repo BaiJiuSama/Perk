@@ -2,6 +2,7 @@ package cn.irina.perk.manager
 
 import cn.irina.perk.Main
 import cn.irina.perk.data.PlayerData
+import cn.irina.perk.perks.AbstractPerk
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.client.model.Filters
@@ -24,14 +25,14 @@ import java.util.concurrent.TimeUnit
  * @Date 2025/10/27 19:46
  */
 
-class MongoManager(private val instance: Main) {
+class MongoManager {
     companion object {
         private val config = Main.cfg
         
         private const val URL = "Database"
         private val IP = config.getString("$URL.ip", "localhost")
         private val PORT = config.getInt("$URL.port", 27017)
-        private val USER = config.getString("$URL.user", "admin")
+        private val USER = config.getString("$URL.user", "")
         private val PASSWORD = config.getString("$URL.password", "")
         private val DATABASE_NAME = config.getString("$URL.db", "Perk")
         
@@ -89,7 +90,7 @@ class MongoManager(private val instance: Main) {
             val doc = Document()
                 .append("uuid", uuid.toString())
                 .append("name", Bukkit.getPlayer(uuid)?.name)
-                .append("currentPerks", listOf<String>())
+                .append("currentPerks", listOf<AbstractPerk>())
                 .append("createdAt", System.currentTimeMillis())
             collection.insertOne(doc)
             return@withContext doc
