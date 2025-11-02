@@ -19,6 +19,7 @@ import org.bukkit.Bukkit
 import java.net.URLEncoder
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlin.toString
 
 /**
  * @Author Irina
@@ -51,9 +52,7 @@ class MongoManager {
         .build()
     private val client: MongoClient by lazy { MongoClient.create(settings) }
     private val database by lazy { client.getDatabase(DATABASE_NAME) }
-    private val collection: MongoCollection<Document> by lazy {
-        database.getCollection<Document>(COLLECTION_NAME)
-    }
+    private val collection: MongoCollection<Document> by lazy { database.getCollection<Document>(COLLECTION_NAME) }
     
     fun buildMongoUri(host: String? = null, port: Int? = null, user: String? = null, password: String? = null, database: String? = null): String {
         val credentials = if (user != null && password != null) "$user:${password.encodeURL()}@" else ""
@@ -62,54 +61,46 @@ class MongoManager {
     
     private fun String.encodeURL(): String = URLEncoder.encode(this, "UTF-8")
     
-    suspend fun getData(uuid: UUID): Document {
-        return withContext(Dispatchers.IO) {
-            try {
-                collection.find(Filters.eq("uuid", uuid.toString())).first()
-            } catch (_: NoSuchElementException) {
-                createData(uuid)
-            }
+    suspend fun getData(uuid: UUID): Document = withContext(Dispatchers.IO) {
+        try {
+            collection.find(Filters.eq("uuid", uuid.toString())).first()
+        } catch (_: NoSuchElementException) {
+            createData(uuid)
         }
     }
     
-    suspend fun saveData(pd: PlayerData): UpdateResult {
-        return withContext(Dispatchers.IO) {
-            collection.updateOne(
-                filter = Filters.eq("uuid", pd.uuid.toString()),
-                update = Document(
-                    $$"$set", Document()
+    suspend fun saveData(pd: PlayerData): UpdateResult =withContext(Dispatchers.IO) {
+        collection.updateOne(
+            filter = Filters.eq("uuid", pd.uuid.toString()),
+            update = Document(
+                $$"$set", Document()
                     .append("currentPerks", pd.currentPerks)
-                ),
-                options = UpdateOptions().upsert(true)
-            )
-        }
+            ),
+            options = UpdateOptions().upsert(true)
+        )
     }
     
-    suspend fun createData(uuid: UUID): Document {
-        return withContext(Dispatchers.IO) {
-            val doc = Document()
-                .append("uuid", uuid.toString())
-                .append("name", Bukkit.getPlayer(uuid)?.name)
-                .append("currentPerks", listOf<AbstractPerk>())
-                .append("createdAt", System.currentTimeMillis())
-            collection.insertOne(doc)
-            return@withContext doc
-        }
+    
+    
+    suspend fun createData(uuid: UUID): Document = withContext(Dispatchers.IO) {
+        val doc = Document()
+            .append("uuid", uuid.toString())
+            .append("name", Bukkit.getPlayer(uuid)?.name)
+            .append("currentPerks", listOf<AbstractPerk>())
+            .append("createdAt", System.currentTimeMillis())
+        collection.insertOne(doc)
+        return@withContext doc
     }
     
-    suspend fun load() {
-        withContext(Dispatchers.IO) {
-            val exists = database.listCollectionNames()
-                .toList()
-                .contains(COLLECTION_NAME)
-            
-            if (exists) database.createCollection(COLLECTION_NAME)
-        }
+    
+    suspend fun load() = withContext(Dispatchers.IO) {
+        val exists = database.listCollectionNames()
+            .toList()
+            .contains(COLLECTION_NAME)
+        
+        if (!exists) database.createCollection(COLLECTION_NAME)
     }
     
-    suspend fun disable() {
-        withContext(Dispatchers.IO) {
-            client.close()
-        }
-    }
+    
+    suspend fun disable() = withContext(Dispatchers.IO) { client.close() }
 }

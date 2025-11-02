@@ -1,5 +1,5 @@
 name: Perk
-version: '0.0.1'
+version: '${version}'
 main: cn.irina.perk.Main
 api-version: '1.20'
 authors: [ Irina ]

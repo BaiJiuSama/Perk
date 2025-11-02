@@ -1,9 +1,9 @@
 package cn.irina.perk.manager
 
 import cn.irina.perk.perks.AbstractPerk
-import cn.irina.perk.util.ConcurrentHashSet
 import cn.irina.perk.util.Log
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentHashMap.newKeySet
 
 /**
  * @Author Irina
@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class PerkManager {
     private val perkMap = ConcurrentHashMap<String, AbstractPerk>()
-    private val perks = ConcurrentHashSet.create<AbstractPerk>()
+    private val perks = newKeySet<AbstractPerk>()
     
     fun getPerkMap(): ConcurrentHashMap<String, AbstractPerk> = perkMap
     fun getPerks(): List<AbstractPerk> = perks.toList()

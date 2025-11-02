@@ -1,10 +1,10 @@
 package cn.irina.perk.event
 
-import cn.irina.perk.util.ConcurrentHashSet
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap.newKeySet
 
 /**
  * @Author Irina
@@ -12,8 +12,8 @@ import java.util.UUID
  */
 
 class SkillListener: Listener {
-    val lighting = ConcurrentHashSet.create<UUID>() //攻击时触发闪电
-    val wither = ConcurrentHashSet.create<UUID>() //攻击时触发凋零效果
+    val lighting = newKeySet<UUID>() //攻击时触发闪电
+    val wither = newKeySet<UUID>() //攻击时触发凋零效果
     
     @EventHandler
     fun onAttack(evt: EntityDamageByEntityEvent) {

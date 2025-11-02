@@ -16,11 +16,7 @@ object CC {
     
     fun color(str: String): String = ChatColor.translateAlternateColorCodes('&', translateHexColorCodes(str))
 
-    fun color(str: List<String>): List<String> {
-        val list = ConcurrentHashMultiset.create<String>()
-        str.forEach { list.add(color(it)) }
-        return list.toList()
-    }
+    fun color(str: List<String>): List<String> = str.map { color(it) }
     
     private fun translateHexColorCodes(message: String): String {
         val colorChar = ChatColor.COLOR_CHAR
