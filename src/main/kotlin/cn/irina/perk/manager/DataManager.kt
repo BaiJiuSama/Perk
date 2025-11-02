@@ -1,8 +1,8 @@
 package cn.irina.perk.manager
 
 import cn.irina.perk.Main
-import cn.irina.perk.data.PlayerData
-import cn.irina.perk.perks.AbstractPerk
+import cn.irina.perk.model.PlayerData
+import cn.irina.perk.model.Perk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,7 +33,7 @@ class DataManager: CoroutineScope {
         val playerData = PlayerData(
             uuid = UUID.fromString(data.getString("uuid")),
             name = data.getString("name"),
-            currentPerks = data.getList("currentPerks", AbstractPerk::class.java),
+            currentPerks = data.getList("currentPerks", Perk::class.java),
             createAt = data.getLong("createAt"),
         )
         cache[uuid] = playerData

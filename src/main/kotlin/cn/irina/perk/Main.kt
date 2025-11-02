@@ -4,7 +4,7 @@ import cn.irina.perk.manager.ConfigManager
 import cn.irina.perk.manager.DataManager
 import cn.irina.perk.manager.MongoManager
 import cn.irina.perk.manager.PerkManager
-import cn.irina.perk.perks.AbstractPerk
+import cn.irina.perk.model.Perk
 import cn.irina.perk.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +18,6 @@ import org.simpleyaml.configuration.file.YamlFile
 import revxrsal.commands.Lamp
 import revxrsal.commands.bukkit.BukkitLamp
 import revxrsal.commands.bukkit.actor.BukkitCommandActor
-import kotlin.coroutines.CoroutineContext
 
 class Main: JavaPlugin(), CoroutineScope {
     companion object {
@@ -46,10 +45,10 @@ class Main: JavaPlugin(), CoroutineScope {
         
         val startTime = System.currentTimeMillis()
         
-        // Init Task
         runCatching {
-            initManager()
             initCommand()
+            initListener()
+            load()
         }.onFailure {
             Log.error("[Main] | 加载失败")
             it.printStackTrace()
@@ -57,24 +56,24 @@ class Main: JavaPlugin(), CoroutineScope {
             Runtime.getRuntime().halt(0)
         }
         
-        // If init task has OK, Then start load task
-        load()
-        initListener()
-        
         val endTime = System.currentTimeMillis()
         val finalTime = (endTime - startTime) / 1000.0
         Log.info("[Main] | 本次启动时长: $finalTime 秒")
     }
     
     private fun load() {
-        val perks = Reflections("cn.irina.perk.perks.impl")
-            .getSubTypesOf(AbstractPerk::class.java)
-            .toList()
+        perkManager = PerkManager()
+        configManager = ConfigManager()
+        dataManager = DataManager()
         
+        val perks = Reflections("cn.irina.perk.perks.impl")
+            .getSubTypesOf(Perk::class.java)
+            .toList()
         perkManager.load(perks)
         
         cfg = configManager.config
         
+        mongoManager = MongoManager(cfg)
         launch { mongoManager.load() }
     }
     
@@ -91,13 +90,6 @@ class Main: JavaPlugin(), CoroutineScope {
         Log.info("[Command] | 加载完毕")
     }
     
-    private fun initManager() {
-        perkManager = PerkManager()
-        configManager = ConfigManager()
-        mongoManager = MongoManager()
-        dataManager = DataManager()
-    }
-    
     private fun initListener() {
         Log.info("[Listener] | 开始加载...")
         val classes = Reflections("cn.irina.perk")
@@ -106,7 +98,7 @@ class Main: JavaPlugin(), CoroutineScope {
         classes.forEach { c ->
             runCatching {
                 Bukkit.getPluginManager().registerEvents(c.getConstructor().newInstance(), this)
-                Log.info("[Listener] | ${c.simpleName}")
+                Log.info("[Listener] | 加载事件: ${c.simpleName}")
             }.onFailure {
                 Log.error("[Listener] | 无法加载 ${c.simpleName}")
                 it.printStackTrace()

@@ -1,8 +1,8 @@
 package cn.irina.perk.manager
 
 import cn.irina.perk.Main
-import cn.irina.perk.data.PlayerData
-import cn.irina.perk.perks.AbstractPerk
+import cn.irina.perk.model.PlayerData
+import cn.irina.perk.model.Perk
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.client.model.Filters
@@ -16,17 +16,17 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withContext
 import org.bson.Document
 import org.bukkit.Bukkit
+import org.simpleyaml.configuration.file.YamlFile
 import java.net.URLEncoder
 import java.util.UUID
 import java.util.concurrent.TimeUnit
-import kotlin.toString
 
 /**
  * @Author Irina
  * @Date 2025/10/27 19:46
  */
 
-class MongoManager {
+class MongoManager(private val config: YamlFile) {
     companion object {
         private val config = Main.cfg
         
@@ -86,7 +86,7 @@ class MongoManager {
         val doc = Document()
             .append("uuid", uuid.toString())
             .append("name", Bukkit.getPlayer(uuid)?.name)
-            .append("currentPerks", listOf<AbstractPerk>())
+            .append("currentPerks", listOf<Perk>())
             .append("createdAt", System.currentTimeMillis())
         collection.insertOne(doc)
         return@withContext doc

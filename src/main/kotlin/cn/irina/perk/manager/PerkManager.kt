@@ -1,6 +1,6 @@
 package cn.irina.perk.manager
 
-import cn.irina.perk.perks.AbstractPerk
+import cn.irina.perk.model.Perk
 import cn.irina.perk.util.Log
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentHashMap.newKeySet
@@ -11,19 +11,19 @@ import java.util.concurrent.ConcurrentHashMap.newKeySet
  */
 
 class PerkManager {
-    private val perkMap = ConcurrentHashMap<String, AbstractPerk>()
-    private val perks = newKeySet<AbstractPerk>()
+    private val perkMap = ConcurrentHashMap<String, Perk>()
+    private val perks = newKeySet<Perk>()
     
-    fun getPerkMap(): ConcurrentHashMap<String, AbstractPerk> = perkMap
-    fun getPerks(): List<AbstractPerk> = perks.toList()
-    fun getPerk(id: String): AbstractPerk? = perkMap[id]
+    fun getPerkMap(): ConcurrentHashMap<String, Perk> = perkMap
+    fun getPerks(): List<Perk> = perks.toList()
+    fun getPerk(id: String): Perk? = perkMap[id]
     
-    fun load(classes: List<Class<out AbstractPerk>>) {
+    fun load(classes: List<Class<out Perk>>) {
         Log.info("[Perk] | 加载中...")
         
         classes.forEach {
             runCatching {
-                val perk = it.getConstructor().newInstance() as AbstractPerk
+                val perk = it.getConstructor().newInstance() as Perk
                 perkMap[perk.id()] = perk
                 perks.add(perk)
                 Log.info("[Perk] | 加载天赋: ${perk.name()}")
