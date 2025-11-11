@@ -34,7 +34,7 @@ class DataManager: CoroutineScope {
             uuid = UUID.fromString(data.getString("uuid")),
             name = data.getString("name"),
             currentPerks = data.getList("currentPerks", Perk::class.java),
-            createAt = data.getLong("createAt"),
+            createAt = data.getLong("createdAt"),
         )
         cache[uuid] = playerData
         playerData
