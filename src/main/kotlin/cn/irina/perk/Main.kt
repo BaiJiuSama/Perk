@@ -1,10 +1,12 @@
 package cn.irina.perk
 
+import cn.irina.perk.command.CommandExceptionHandler
 import cn.irina.perk.manager.ConfigManager
 import cn.irina.perk.manager.DataManager
 import cn.irina.perk.manager.MongoManager
 import cn.irina.perk.manager.PerkManager
 import cn.irina.perk.model.Perk
+import cn.irina.perk.util.ClassUtil
 import cn.irina.perk.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.reflections.Reflections
 import org.simpleyaml.configuration.file.YamlFile
 import revxrsal.commands.Lamp
+import revxrsal.commands.annotation.Command
 import revxrsal.commands.bukkit.BukkitLamp
 import revxrsal.commands.bukkit.actor.BukkitCommandActor
 
@@ -46,12 +49,13 @@ class Main: JavaPlugin(), CoroutineScope {
         val startTime = System.currentTimeMillis()
         
         runCatching {
+            load()
+            
             initCommand()
             initListener()
-            load()
         }.onFailure {
-            Log.error("[Main] | 加载失败")
             it.printStackTrace()
+            Log.error("[Main] | 加载失败")
             
             Runtime.getRuntime().halt(0)
         }
@@ -64,7 +68,6 @@ class Main: JavaPlugin(), CoroutineScope {
     private fun load() {
         perkManager = PerkManager()
         configManager = ConfigManager()
-        dataManager = DataManager()
         
         val perks = Reflections("cn.irina.perk.perks.impl")
             .getSubTypesOf(Perk::class.java)
@@ -75,6 +78,8 @@ class Main: JavaPlugin(), CoroutineScope {
         
         mongoManager = MongoManager(cfg)
         launch { mongoManager.load() }
+        
+        dataManager = DataManager()
     }
     
     override fun onDisable() {
@@ -82,22 +87,47 @@ class Main: JavaPlugin(), CoroutineScope {
     }
     
     private fun initCommand() {
-        Log.info("[Command] | 开始加载...")
-        
-        lamp = BukkitLamp.builder(this).build()
-        lamp.register()
-        
-        Log.info("[Command] | 加载完毕")
+        runCatching {
+            Log.info("[Command] | 开始加载...")
+            
+            val objects = ClassUtil.getClassesInPackage(this, "cn.irina.perk.command.impl")
+            if (objects == null) {
+                Log.info("[Command] | 无指令类需注册!")
+                return
+            }
+            
+            val fillObjects = objects.filter { Command::class.java.isAssignableFrom(it!!) }
+            
+            lamp = BukkitLamp.builder(this)
+                .exceptionHandler(CommandExceptionHandler())
+                .build()
+            
+            lamp.register(fillObjects)
+            objects.map { Log.info("[Command] | 加载指令: ${it!!.simpleName}") }
+            
+            Log.info("[Command] | 加载完毕")
+        }.onFailure {
+            it.printStackTrace()
+            Log.error("[Command] | 加载指令类失败!")
+            
+            Runtime.getRuntime().halt(0)
+        }
     }
     
     private fun initListener() {
         Log.info("[Listener] | 开始加载...")
-        val classes = Reflections("cn.irina.perk")
-            .getSubTypesOf(Listener::class.java)
+        val classes = ClassUtil.getClassesInPackage(this, "cn.irina.perk")
+        
+        if (classes == null) {
+            Log.info("[Listener] | 监听类为空!")
+            return
+        }
         
         classes.forEach { c ->
+            if (!Listener::class.java.isAssignableFrom(c!!)) return@forEach
+            
             runCatching {
-                Bukkit.getPluginManager().registerEvents(c.getConstructor().newInstance(), this)
+                Bukkit.getPluginManager().registerEvents(c.getConstructor().newInstance() as Listener, this)
                 Log.info("[Listener] | 加载事件: ${c.simpleName}")
             }.onFailure {
                 Log.error("[Listener] | 无法加载 ${c.simpleName}")
