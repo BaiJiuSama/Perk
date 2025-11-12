@@ -37,10 +37,13 @@ class MongoManager(private val config: YamlFile) {
         private val PASSWORD = config.getString("$URL.password", "")
         private val DATABASE_NAME = config.getString("$URL.db", "Perk")
         
+        private val credentials = if (USER != null && PASSWORD != null) "$USER:${PASSWORD.encodeURL()}@" else ""
+        private val connectionUrl = "mongodb://$credentials$IP:$PORT/${DATABASE_NAME ?: ""}"
+        
         private const val COLLECTION_NAME = "players"
+        
+        private fun String.encodeURL(): String = URLEncoder.encode(this, "UTF-8")
     }
-    
-    private val connectionUrl = buildMongoUri(IP, PORT, USER, PASSWORD, DATABASE_NAME)
     
     private val settings  = MongoClientSettings.builder()
         .applyConnectionString(ConnectionString(connectionUrl))
@@ -48,50 +51,34 @@ class MongoManager(private val config: YamlFile) {
             pool.maxSize(50)
             pool.minSize(5)
             pool.maxWaitTime(30, TimeUnit.SECONDS)
-        }
-        .build()
+        }.build()
+    
     private val client: MongoClient by lazy { MongoClient.create(settings) }
     private val database by lazy { client.getDatabase(DATABASE_NAME) }
     private val collection: MongoCollection<Document> by lazy { database.getCollection<Document>(COLLECTION_NAME) }
     
-    fun buildMongoUri(host: String? = null, port: Int? = null, user: String? = null, password: String? = null, database: String? = null): String {
-        val credentials = if (user != null && password != null) "$user:${password.encodeURL()}@" else ""
-        return "mongodb://$credentials$host:$port/${database ?: ""}"
-    }
-    
-    private fun String.encodeURL(): String = URLEncoder.encode(this, "UTF-8")
-    
     suspend fun getData(uuid: UUID): Document = withContext(Dispatchers.IO) {
-        try {
-            collection.find(Filters.eq("uuid", uuid.toString())).first()
-        } catch (_: NoSuchElementException) {
-            createData(uuid)
-        }
+        try { collection.find(Filters.eq("uuid", uuid.toString())).first() }
+        catch (_: NoSuchElementException) { createData(uuid) }
     }
     
-    suspend fun saveData(pd: PlayerData): UpdateResult =withContext(Dispatchers.IO) {
+    suspend fun saveData(pd: PlayerData): UpdateResult = withContext(Dispatchers.IO) {
         collection.updateOne(
             filter = Filters.eq("uuid", pd.uuid.toString()),
-            update = Document(
-                $$"$set", Document()
-                    .append("currentPerks", pd.currentPerks)
-            ),
+            update = Document($$"$set", Document().append("currentPerks", pd.currentPerks)),
             options = UpdateOptions().upsert(true)
         )
     }
-    
-    
     
     suspend fun createData(uuid: UUID): Document = withContext(Dispatchers.IO) {
         val doc = Document()
             .append("uuid", uuid.toString())
             .append("name", Bukkit.getPlayer(uuid)?.name)
             .append("currentPerks", listOf<Perk>())
-            .append("createdAt", System.currentTimeMillis())
+            .append("createAt", System.currentTimeMillis())
         collection.insertOne(doc)
         return@withContext doc
     }
-    
     
     suspend fun load() = withContext(Dispatchers.IO) {
         val exists = database.listCollectionNames()
@@ -100,7 +87,6 @@ class MongoManager(private val config: YamlFile) {
         
         if (!exists) database.createCollection(COLLECTION_NAME)
     }
-    
     
     suspend fun disable() = withContext(Dispatchers.IO) { client.close() }
 }
