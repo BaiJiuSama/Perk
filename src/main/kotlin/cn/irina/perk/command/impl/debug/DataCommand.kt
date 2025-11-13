@@ -9,7 +9,6 @@ import revxrsal.commands.annotation.CommandPlaceholder
 import revxrsal.commands.annotation.Optional
 import revxrsal.commands.annotation.Subcommand
 import revxrsal.commands.bukkit.actor.BukkitCommandActor
-import java.util.UUID
 
 /**
  * @Author Irina

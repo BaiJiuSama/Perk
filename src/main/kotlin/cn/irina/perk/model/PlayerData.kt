@@ -1,6 +1,5 @@
 package cn.irina.perk.model
 
-import cn.irina.perk.model.Perk
 import java.util.UUID
 
 /**
