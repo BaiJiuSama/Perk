@@ -9,9 +9,10 @@ import org.bukkit.Bukkit
 
 object Log {
     private val logger = Bukkit.getLogger()
+    private const val PREFIX = "[Perk] "
     
-    fun info(str: String) = logger.info(str)
-    fun warn(str: String) = logger.warning(str)
-    fun error(str: String) = logger.severe(str)
-    fun debug(str: String) = logger.info("[DEBUG] $str")
+    fun info(str: String) = logger.info(PREFIX + str)
+    fun warn(str: String) = logger.warning(PREFIX + str)
+    fun error(str: String) = logger.severe(PREFIX + str)
+    fun debug(str: String) = logger.info("$PREFIX[DEBUG] $str")
 }
