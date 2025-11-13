@@ -13,4 +13,5 @@ abstract class Perk {
     abstract fun description(): String // 描述
     
     abstract fun execute(player: Player) // 被选择后对玩家属性的修改
+    abstract fun cancel(player: Player) // 取消选择后对玩家属性的恢复
 }
