@@ -34,8 +34,8 @@ class DataListener: Listener, CoroutineScope {
         runCatching {
             launch {
                 CC.send(player, "${PREFIX}数据加载中...")
-                dataManager.loadData(player.uniqueId)
-                CC.send(player, "${PREFIX}加载完毕!")
+                if (dataManager.loadData(player.uniqueId)) CC.send(player, "${PREFIX}加载完毕!")
+                else player.kickPlayer("${PREFIX}数据加载错误!")
             }
         }.onFailure {
             it.printStackTrace()
