@@ -1,6 +1,6 @@
 Database:
   # MongoDB
-  ip: "idk"
+  ip: "localhost"
   port: 27017
   db: "Perk"
   user: "idk" #可留空
