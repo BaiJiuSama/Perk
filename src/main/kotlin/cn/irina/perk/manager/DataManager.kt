@@ -3,6 +3,7 @@ package cn.irina.perk.manager
 import cn.irina.perk.Main
 import cn.irina.perk.model.PlayerData
 import cn.irina.perk.model.Perk
+import cn.irina.perk.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -28,16 +29,23 @@ class DataManager: CoroutineScope {
     
     fun getData(uuid: UUID): PlayerData? = cache[uuid]
     
-    suspend fun loadData(uuid: UUID): PlayerData = withContext(Dispatchers.IO) {
-        val data = mongoManager.getData(uuid)
-        val playerData = PlayerData(
-            uuid = UUID.fromString(data.getString("uuid")),
-            name = data.getString("name"),
-            currentPerks = data.getList("currentPerks", Perk::class.java),
-            createAt = data.getLong("createdAt"),
-        )
-        cache[uuid] = playerData
-        playerData
+    suspend fun loadData(uuid: UUID): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val data = mongoManager.getData(uuid)
+            val playerData = PlayerData(
+                uuid = UUID.fromString(data.getString("uuid")),
+                name = data.getString("name"),
+                currentPerks = data.getList("currentPerks", Perk::class.java),
+                createAt = data.getLong("createAt"),
+            )
+            cache[uuid] = playerData
+            
+            return@withContext true
+        } catch (e: Exception) {
+            Log.error("无法加载玩家数据")
+            e.printStackTrace()
+            return@withContext false
+        }
     }
     
     fun saveData(pd: PlayerData) = launch { mongoManager.saveData(pd) }
