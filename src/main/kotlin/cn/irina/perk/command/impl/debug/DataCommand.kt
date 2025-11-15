@@ -9,21 +9,22 @@ import revxrsal.commands.annotation.CommandPlaceholder
 import revxrsal.commands.annotation.Optional
 import revxrsal.commands.annotation.Subcommand
 import revxrsal.commands.bukkit.actor.BukkitCommandActor
+import revxrsal.commands.bukkit.annotation.FallbackPrefix
 
 /**
  * @Author Irina
  * @Date 2025/11/11 18:54
  */
 
+@FallbackPrefix("irina")
 @Command("perk data")
 class DataCommand {
     private val instance = Main.instance
     private val dataManager = instance.dataManager
     private val perkManager = instance.perkManager
     
-    private val line = "&f&m                        "
+    private val line = CC.commandColorLine
     private val helpMsg = listOf(
-        "",
         line,
         "",
         "&7查看个人数据",
@@ -35,17 +36,8 @@ class DataCommand {
         "&7移除个人天赋",
         "&f/perk data remove <PERK NAME>",
         "",
-        line,
-        ""
+        line
     )
-    
-    private fun getPlayer(actor: BukkitCommandActor): Player? {
-        if (actor is Player)
-            return actor
-        else
-            actor.sendRawMessage(CC.color("&c非玩家目标!"))
-            return null
-    }
     
     private fun getData(player: Player): PlayerData? {
         val data = dataManager.getData(player.uniqueId)
@@ -62,7 +54,7 @@ class DataCommand {
     
     @Subcommand("myData")
     fun onCheckAll(actor: BukkitCommandActor) {
-        val player = getPlayer(actor) ?: return
+        val player = actor.requirePlayer()
         val data = getData(player) ?: return
         
         listOf(
@@ -75,7 +67,7 @@ class DataCommand {
     
     @Subcommand("add")
     fun onAdd(actor: BukkitCommandActor, @Optional perkName: String) {
-        val player = getPlayer(actor) ?: return
+        val player = actor.requirePlayer()
         val data = getData(player) ?: return
         
         val selectPerk = perkManager.getPerk(perkName) ?: return
@@ -87,7 +79,7 @@ class DataCommand {
     
     @Subcommand("remove")
     fun onRemove(actor: BukkitCommandActor, @Optional perkName: String) {
-        val player = getPlayer(actor) ?: return
+        val player = actor.requirePlayer()
         val data = getData(player) ?: return
         val currentPerks = data.currentPerks
         val selectPerk = perkManager.getPerk(perkName) ?: return
