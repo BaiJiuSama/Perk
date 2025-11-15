@@ -1,6 +1,5 @@
 package cn.irina.perk.util
 
-import com.google.common.collect.ConcurrentHashMultiset
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import java.util.regex.Pattern
@@ -11,6 +10,8 @@ import java.util.regex.Pattern
  */
 
 object CC {
+    val commandColorLine = color("&#CDFDFF&m   &#BDFDFD&m   &#ADFDFA&m   &#9EFDF8&m   &#8EFEF5&m   &#7EFEF3&m   &#6EFEF1&m   &#5FFEEE&m   &#4FFEEC&m   &#3FFEEA&m   &#2FFFE7&m   &#20FFE5&m   &#10FFE2&m   &#00FFE0&m   ")
+    
     fun send(p: Player, msg: String) = p.sendMessage(color(msg))
     fun send(p: Player, msg: List<String>) = msg.forEach { send(p, color(it)) }
     
