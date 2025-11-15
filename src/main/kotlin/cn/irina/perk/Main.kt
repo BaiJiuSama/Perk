@@ -13,12 +13,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import org.reflections.Reflections
 import org.simpleyaml.configuration.file.YamlFile
 import revxrsal.commands.Lamp
-import revxrsal.commands.annotation.Command
 import revxrsal.commands.bukkit.BukkitLamp
 import revxrsal.commands.bukkit.actor.BukkitCommandActor
 
@@ -30,6 +30,7 @@ class Main: JavaPlugin(), CoroutineScope {
         lateinit var instance: Main
         
         lateinit var cfg: YamlFile
+        
         private lateinit var lamp: Lamp<BukkitCommandActor>
     }
     
@@ -86,42 +87,33 @@ class Main: JavaPlugin(), CoroutineScope {
     
     }
     
-    private fun initCommand() {
-        runCatching {
-            Log.info("[Command] | 开始加载...")
-            
-            val objects = ClassUtil.getClassesInPackage(this, "cn.irina.perk.command.impl")
-            if (objects == null) {
-                Log.info("[Command] | 无指令类需注册!")
-                return
+    private fun initCommand() = runCatching {
+        Log.info("[Command] | 开始加载...")
+        lamp = BukkitLamp.builder(this)
+            .exceptionHandler(CommandExceptionHandler())
+            .suggestionProviders { providers ->
+                providers.addProvider(Player::class.java) { _ -> Bukkit.getOnlinePlayers().map { it.name } }
             }
-            
-            val fillObjects = objects.filter { Command::class.java.isAssignableFrom(it!!) }
-            
-            lamp = BukkitLamp.builder(this)
-                .exceptionHandler(CommandExceptionHandler())
-                .build()
-            
-            lamp.register(fillObjects)
-            objects.map { Log.info("[Command] | 加载指令: ${it!!.simpleName}") }
-            
-            Log.info("[Command] | 加载完毕")
-        }.onFailure {
-            it.printStackTrace()
-            Log.error("[Command] | 加载指令类失败!")
-            
-            Runtime.getRuntime().halt(0)
+            .build()
+        
+        val objects = ClassUtil.getClassesInPackage(this, "cn.irina.perk.command.impl")
+        
+        objects.map {
+            lamp.register(it.getConstructor().newInstance())
+            Log.info("[Command] | 加载指令类: ${it!!.simpleName}")
         }
+        
+        Log.info("[Command] | 加载完毕")
+    }.onFailure {
+        it.printStackTrace()
+        Log.error("[Command] | 加载指令类失败!")
+        
+        Runtime.getRuntime().halt(0)
     }
     
     private fun initListener() {
         Log.info("[Listener] | 开始加载...")
         val classes = ClassUtil.getClassesInPackage(this, "cn.irina.perk")
-        
-        if (classes == null) {
-            Log.info("[Listener] | 监听类为空!")
-            return
-        }
         
         classes.forEach { c ->
             if (!Listener::class.java.isAssignableFrom(c!!)) return@forEach
