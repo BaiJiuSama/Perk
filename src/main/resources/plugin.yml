@@ -3,4 +3,5 @@ version: '${version}'
 main: cn.irina.perk.Main
 api-version: '1.20'
 authors: [ Irina ]
+supporters: [ MIYU, An5w1r_ ]
 website: irina.asia
