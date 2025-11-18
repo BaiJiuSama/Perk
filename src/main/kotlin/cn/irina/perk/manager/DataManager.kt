@@ -1,16 +1,12 @@
 package cn.irina.perk.manager
 
 import cn.irina.perk.Main
-import cn.irina.perk.model.PlayerData
 import cn.irina.perk.model.Perk
+import cn.irina.perk.model.PlayerData
 import cn.irina.perk.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.bukkit.Bukkit
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -48,10 +44,10 @@ class DataManager: CoroutineScope {
         }
     }
     
-    fun saveData(pd: PlayerData) = launch { mongoManager.saveData(pd) }
+    suspend fun saveData(pd: PlayerData) = withContext(Dispatchers.IO) { mongoManager.saveData(pd) }
     fun cleanCache(uuid: UUID) = cache.remove(uuid)
     
-    fun onClose() {
+    fun onClose() = launch {
         Bukkit.getOnlinePlayers().forEach { p ->
             val uuid = p.uniqueId
             saveData(getData(uuid) ?: return@forEach)
