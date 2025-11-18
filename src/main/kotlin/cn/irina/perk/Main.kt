@@ -16,7 +16,6 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
-import org.reflections.Reflections
 import org.simpleyaml.configuration.file.YamlFile
 import revxrsal.commands.Lamp
 import revxrsal.commands.bukkit.BukkitLamp
@@ -58,6 +57,7 @@ class Main: JavaPlugin(), CoroutineScope {
             it.printStackTrace()
             Log.error("[Main] | 加载失败")
             
+            Thread.sleep(5000L)
             Runtime.getRuntime().halt(0)
         }
         
@@ -70,9 +70,9 @@ class Main: JavaPlugin(), CoroutineScope {
         perkManager = PerkManager()
         configManager = ConfigManager()
         
-        val perks = Reflections("cn.irina.perk.perks.impl")
-            .getSubTypesOf(Perk::class.java)
-            .toList()
+        val perks = ClassUtil.getClassesInPackage(this, "cn.irina.perk.perks.impl")
+            .filter { Perk::class.java.isAssignableFrom(it) }
+
         perkManager.load(perks)
         
         cfg = configManager.config
@@ -114,10 +114,10 @@ class Main: JavaPlugin(), CoroutineScope {
     private fun initListener() {
         Log.info("[Listener] | 开始加载...")
         val classes = ClassUtil.getClassesInPackage(this, "cn.irina.perk")
+            .filter { Listener::class.java.isAssignableFrom(it) }
+            .filterNotNull()
         
         classes.forEach { c ->
-            if (!Listener::class.java.isAssignableFrom(c!!)) return@forEach
-            
             runCatching {
                 Bukkit.getPluginManager().registerEvents(c.getConstructor().newInstance() as Listener, this)
                 Log.info("[Listener] | 加载事件: ${c.simpleName}")
