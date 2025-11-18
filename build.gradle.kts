@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.implementation
-
 plugins {
     kotlin("jvm") version "2.3.0-Beta1"
     id("com.gradleup.shadow") version "8.3.0"
@@ -21,6 +19,7 @@ repositories {
 dependencies {
     compileOnly("org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation(kotlin("reflect"))
     
     implementation("com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4")
     implementation("org.reflections:reflections:0.10.2")
@@ -46,9 +45,7 @@ tasks {
     }
     
     shadowJar {
-        relocate("kotlin", "cn.irina.thirdparty.kotlin")
-        relocate("org.jetbrains.annotations", "cn.irina.thirdparty.org.jetbrains.annotations")
-        relocate("org.intellij.lang.annotations", "cn.irina.thirdparty.org.intellij.lang.annotations")
+        mergeServiceFiles()
         
         archiveVersion.set(version.toString())
     }
