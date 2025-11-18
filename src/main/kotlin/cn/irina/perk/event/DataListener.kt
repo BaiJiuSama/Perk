@@ -48,7 +48,14 @@ class DataListener: Listener, CoroutineScope {
         val player = evt.player
         val uuid = player.uniqueId
         
-        dataManager.saveData(dataManager.getData(uuid) ?: return)
-        dataManager.cleanCache(uuid)
+        runCatching {
+            launch {
+                dataManager.saveData(dataManager.getData(uuid) ?: return@launch)
+                dataManager.cleanCache(uuid)
+            }
+        }.onFailure {
+            it.printStackTrace()
+            CC.send(player, "${PREFIX}&c错误时间 &f${LocalTime.now()}&c, 请将此消息报告至管理员!")
+        }
     }
 }
