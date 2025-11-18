@@ -18,12 +18,12 @@ class PerkManager {
     fun getPerks(): List<Perk> = perks.toList()
     fun getPerk(id: String): Perk? = perkMap[id]
     
-    fun load(classes: List<Class<out Perk>>) {
+    fun load(classes: List<Class<*>>) {
         Log.info("[Perk] | 加载中...")
         
         classes.forEach {
             runCatching {
-                val perk = it.getConstructor().newInstance() as Perk
+                val perk = it.getConstructor().newInstance() as? Perk ?: return@forEach
                 perkMap[perk.id()] = perk
                 perks.add(perk)
                 Log.info("[Perk] | 加载天赋: ${perk.name()}")
