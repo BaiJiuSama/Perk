@@ -65,7 +65,10 @@ class MongoManager(private val config: YamlFile) {
     suspend fun saveData(pd: PlayerData): UpdateResult = withContext(Dispatchers.IO) {
         collection.updateOne(
             filter = Filters.eq("uuid", pd.uuid.toString()),
-            update = Document($$"$set", Document().append("currentPerks", pd.currentPerks)),
+            update = Document(
+                $$"$set", Document()
+                .append("currentPerks", pd.currentPerks)
+            ),
             options = UpdateOptions().upsert(true)
         )
     }
