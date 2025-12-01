@@ -1,7 +1,6 @@
 package cn.irina.perk.manager
 
 import cn.irina.perk.Main
-import cn.irina.perk.model.Perk
 import cn.irina.perk.model.PlayerData
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
@@ -77,7 +76,7 @@ class MongoManager(private val config: YamlFile) {
         val doc = Document()
             .append("uuid", uuid.toString())
             .append("name", Bukkit.getPlayer(uuid)?.name)
-            .append("currentPerks", listOf<Perk>())
+            .append("currentPerks", listOf<String>())
             .append("createAt", System.currentTimeMillis())
         collection.insertOne(doc)
         return@withContext doc

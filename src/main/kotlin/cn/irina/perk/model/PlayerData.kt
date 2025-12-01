@@ -1,6 +1,6 @@
 package cn.irina.perk.model
 
-import java.util.UUID
+import java.util.*
 
 /**
  * @Author Irina
@@ -10,6 +10,6 @@ import java.util.UUID
 data class PlayerData(
     val uuid: UUID,
     val name: String,
-    var currentPerks: MutableList<Perk>,
+    var currentPerks: MutableList<String>,
     val createAt: Long
 )

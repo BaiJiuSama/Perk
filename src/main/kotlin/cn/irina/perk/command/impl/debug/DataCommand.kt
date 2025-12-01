@@ -72,7 +72,7 @@ class DataCommand {
         
         val selectPerk = perkManager.getPerk(perkName) ?: return
         selectPerk.execute(player)
-        data.currentPerks.add(selectPerk)
+        data.currentPerks.add(selectPerk.id())
         
         player.sendMessage(CC.color("&aSuccessfully"))
     }
@@ -84,13 +84,13 @@ class DataCommand {
         val currentPerks = data.currentPerks
         val selectPerk = perkManager.getPerk(perkName) ?: return
         
-        if (!currentPerks.contains(selectPerk)) {
+        if (!currentPerks.contains(selectPerk.id())) {
             player.sendMessage(CC.color("&c无效的天赋!"))
             return
         }
         
         selectPerk.cancel(player)
-        data.currentPerks.remove(selectPerk)
+        data.currentPerks.remove(selectPerk.id())
         
         player.sendMessage(CC.color("&aSuccessfully"))
     }
