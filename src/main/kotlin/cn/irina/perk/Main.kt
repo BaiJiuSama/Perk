@@ -14,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import org.simpleyaml.configuration.file.YamlFile
@@ -67,6 +68,7 @@ class Main: JavaPlugin(), CoroutineScope {
     }
     
     private fun load() {
+        
         perkManager = PerkManager()
         configManager = ConfigManager()
         
@@ -84,7 +86,11 @@ class Main: JavaPlugin(), CoroutineScope {
     }
     
     override fun onDisable() {
-    
+        runCatching { launch { mongoManager.disable() } }
+            .onFailure { it.printStackTrace() }
+        
+        HandlerList.unregisterAll(this)
+        lamp.unregisterAllCommands()
     }
     
     private fun initCommand() = runCatching {
