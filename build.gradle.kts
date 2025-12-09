@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "cn.irina"
-version = "0.0.1"
+version = "0.0.1-beta"
 
 repositories {
     mavenCentral()
@@ -35,6 +35,15 @@ kotlin {
 }
 
 tasks {
+    processResources {
+        filesMatching("**/plugin.yml") {
+            expand(
+                "version" to project.version,
+                "buildTime" to System.currentTimeMillis()
+            )
+        }
+    }
+    
     compileJava {
         options.compilerArgs.add("-parameters")
     }
@@ -48,6 +57,7 @@ tasks {
         mergeServiceFiles()
         
         archiveVersion.set(version.toString())
+        archiveFileName.set("Perk-${version}.jar")
     }
     
     jar {
