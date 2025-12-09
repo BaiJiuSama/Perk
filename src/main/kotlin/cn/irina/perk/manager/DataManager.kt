@@ -16,6 +16,10 @@ import java.util.concurrent.ConcurrentHashMap
 class DataManager: CoroutineScope {
     private val instance = Main.instance
     private val mongoManager = instance.mongoManager
+    private val skillManager = instance.skillManager
+    private val perkManager = instance.perkManager
+    
+    private val skills = skillManager.skills
     
     private val job = Job()
     override val coroutineContext = job + Dispatchers.Default
@@ -34,6 +38,7 @@ class DataManager: CoroutineScope {
                 createAt = data.getLong("createAt"),
             )
             cache[uuid] = playerData
+            loadSkillData(playerData)
             
             return@withContext true
         } catch (e: Exception) {
@@ -43,8 +48,24 @@ class DataManager: CoroutineScope {
         }
     }
     
+    private fun loadSkillData(data: PlayerData) = data.currentPerks.forEach {
+        val id = it.uppercase()
+        if (!skills.contains(id)) return@forEach
+        skillManager.addPlayer(id, data.uuid)
+    }
+    
     suspend fun saveData(pd: PlayerData) = withContext(Dispatchers.IO) { mongoManager.saveData(pd) }
-    fun cleanCache(uuid: UUID) = cache.remove(uuid)
+    
+    fun cleanCache(uuid: UUID) {
+        unLoadSkillData(cache[uuid] ?: return)
+        cache.remove(uuid)
+    }
+    
+    private fun unLoadSkillData(data: PlayerData) = skills.forEach {
+        val id = it.uppercase()
+        if (!skillManager.isActive(id, data.uuid)) return@forEach
+        skillManager.removePlayer(id, data.uuid)
+    }
     
     fun onClose() = launch {
         Bukkit.getOnlinePlayers().forEach { p ->
