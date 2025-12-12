@@ -1,7 +1,10 @@
 package cn.irina.perk
 
 import cn.irina.perk.command.CommandExceptionHandler
-import cn.irina.perk.manager.*
+import cn.irina.perk.manager.ConfigManager
+import cn.irina.perk.manager.DataManager
+import cn.irina.perk.manager.MongoManager
+import cn.irina.perk.manager.PerkManager
 import cn.irina.perk.model.Perk
 import cn.irina.perk.util.ClassUtil
 import cn.irina.perk.util.Log
@@ -35,7 +38,6 @@ class Main: JavaPlugin(), CoroutineScope {
     lateinit var configManager: ConfigManager
     lateinit var mongoManager: MongoManager
     lateinit var dataManager: DataManager
-    lateinit var skillManager: SkillManager
     
     private val job = Job()
     override val coroutineContext = job + Dispatchers.Default
@@ -66,7 +68,6 @@ class Main: JavaPlugin(), CoroutineScope {
     }
     
     private fun load() {
-        skillManager = SkillManager()
         perkManager = PerkManager()
         configManager = ConfigManager()
         

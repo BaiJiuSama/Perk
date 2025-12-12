@@ -2,6 +2,7 @@ package cn.irina.perk.command.impl.debug
 
 import cn.irina.perk.Main
 import cn.irina.perk.model.PlayerData
+import cn.irina.perk.perks.parm.IActive
 import cn.irina.perk.util.CC
 import org.bukkit.entity.Player
 import revxrsal.commands.annotation.Command
@@ -71,7 +72,7 @@ class DataCommand {
         val data = getData(player) ?: return
         
         val selectPerk = perkManager.getPerk(perkName) ?: return
-        selectPerk.execute(player)
+        if (selectPerk is IActive) selectPerk.execute(player)
         data.currentPerks.add(selectPerk.id())
         
         player.sendMessage(CC.color("&aSuccessfully"))
@@ -89,7 +90,7 @@ class DataCommand {
             return
         }
         
-        selectPerk.cancel(player)
+        if (selectPerk is IActive) selectPerk.cancel(player)
         data.currentPerks.remove(selectPerk.id())
         
         player.sendMessage(CC.color("&aSuccessfully"))
