@@ -21,16 +21,19 @@ class CombatListener: Listener {
     
     @EventHandler
     fun onFight(evt: EntityDamageByEntityEvent) {
-        val attacker = evt.damager as? Player ?: return
+        val attacker = evt.damager
         val victim = evt.entity
         if (victim == attacker) return
         
-        val aUid = attacker.uniqueId
-        trackSkill(aUid, evt, false)
+        if (attacker is Player) {
+            val aUid = attacker.uniqueId
+            trackSkill(aUid, evt, false)
+        }
         
-        if (victim !is Player) return
-        val vUid = victim.uniqueId
-        trackSkill(vUid, evt, true)
+        if (victim is Player) {
+            val vUid = victim.uniqueId
+            trackSkill(vUid, evt, true)
+        }
     }
     
     private fun getCurrentPerks(uuid: UUID): MutableList<String> {
@@ -39,10 +42,13 @@ class CombatListener: Listener {
     }
     
     private fun trackSkill(uuid: UUID, evt: EntityDamageByEntityEvent, isDefense: Boolean) {
+        val perks = getCurrentPerks(uuid)
+        if (perks.isEmpty()) return
+        
         val attacker = if (isDefense) evt.damager else evt.damager as? Player ?: return
         val victim = if (isDefense) evt.entity as? Player ?: return else evt.entity
         
-        getCurrentPerks(uuid).forEach { p ->
+        perks.forEach { p ->
             val perk = perkManager.getPerk(p) ?: return@forEach
             
             val perkObj = perk::class.java.getDeclaredConstructor().newInstance()

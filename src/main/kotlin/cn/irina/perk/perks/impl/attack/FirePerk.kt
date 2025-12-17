@@ -1,4 +1,4 @@
-package cn.irina.perk.perks.impl
+package cn.irina.perk.perks.impl.attack
 
 import cn.irina.perk.model.Perk
 import cn.irina.perk.perks.parm.IAttack

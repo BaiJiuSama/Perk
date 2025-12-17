@@ -71,24 +71,24 @@ class Main: JavaPlugin(), CoroutineScope {
         perkManager = PerkManager()
         configManager = ConfigManager()
         
-        val perks = ClassUtil.getClassesInPackage(this, "cn.irina.perk.perks.impl")
-            .filter { Perk::class.java.isAssignableFrom(it) }
-
-        perkManager.load(perks)
-        
         cfg = configManager.config
         
         mongoManager = MongoManager(cfg)
         launch { mongoManager.load() }
         
         dataManager = DataManager()
+        
+        val perks = ClassUtil.getClassesInPackage(this, "cn.irina.perk.perks.impl")
+            .filter { Perk::class.java.isAssignableFrom(it) }
+        
+        perkManager.load(perks)
     }
     
     override fun onDisable() {
+        dataManager.onClose()
+        
         runCatching { launch { mongoManager.disable() } }
             .onFailure { it.printStackTrace() }
-        
-        dataManager.onClose()
         
         HandlerList.unregisterAll(this)
         lamp.unregisterAllCommands()
