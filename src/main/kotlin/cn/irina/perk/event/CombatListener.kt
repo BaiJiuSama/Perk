@@ -1,8 +1,8 @@
 package cn.irina.perk.event
 
 import cn.irina.perk.Main
-import cn.irina.perk.perks.parm.IAttack
-import cn.irina.perk.perks.parm.IDefense
+import cn.irina.perk.model.parm.IAttack
+import cn.irina.perk.model.parm.IDefense
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener

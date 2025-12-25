@@ -2,8 +2,8 @@ package cn.irina.perk.command.impl.debug
 
 import cn.irina.perk.Main
 import cn.irina.perk.model.PlayerData
-import cn.irina.perk.perks.parm.IActive
 import cn.irina.perk.util.CC
+import cn.irina.perk.util.PerkUtil
 import org.bukkit.entity.Player
 import revxrsal.commands.annotation.Command
 import revxrsal.commands.annotation.CommandPlaceholder
@@ -51,7 +51,7 @@ class DataCommand {
     }
     
     @CommandPlaceholder
-    fun onCommand(actor: BukkitCommandActor) { helpMsg.map { actor.sendRawMessage(CC.color(it)) } }
+    fun onCommand(actor: BukkitCommandActor) { helpMsg.forEach { actor.sendRawMessage(CC.color(it)) } }
     
     @Subcommand("myData")
     fun onCheckAll(actor: BukkitCommandActor) {
@@ -63,36 +63,22 @@ class DataCommand {
             "NAME: ${data.name}",
             "PERKS: ${data.currentPerks}",
             "CREATED AT: ${data.createAt}"
-        ).map { actor.sendRawMessage(it) }
+        ).forEach { actor.sendRawMessage(it) }
     }
     
+    private val perkUtil = PerkUtil
     @Subcommand("add")
     fun onAdd(actor: BukkitCommandActor, @Optional perkName: String) {
         val player = actor.requirePlayer()
-        val data = getData(player) ?: return
         
-        val selectPerk = perkManager.getPerk(perkName) ?: return
-        if (selectPerk is IActive) selectPerk.execute(player)
-        data.currentPerks.add(selectPerk.id())
-        
-        player.sendMessage(CC.color("&aSuccessfully"))
+        if (perkUtil.active(player, perkName)) player.sendMessage(CC.color("&aSuccessfully"))
+        else CC.send(player, "ERROR!")
     }
     
     @Subcommand("remove")
     fun onRemove(actor: BukkitCommandActor, @Optional perkName: String) {
         val player = actor.requirePlayer()
-        val data = getData(player) ?: return
-        val currentPerks = data.currentPerks
-        val selectPerk = perkManager.getPerk(perkName) ?: return
-        
-        if (!currentPerks.contains(selectPerk.id())) {
-            player.sendMessage(CC.color("&c无效的天赋!"))
-            return
-        }
-        
-        if (selectPerk is IActive) selectPerk.cancel(player)
-        data.currentPerks.remove(selectPerk.id())
-        
-        player.sendMessage(CC.color("&aSuccessfully"))
+        if (perkUtil.close(player, perkName)) player.sendMessage(CC.color("&aSuccessfully"))
+        else CC.send(player, "ERROR!")
     }
 }
