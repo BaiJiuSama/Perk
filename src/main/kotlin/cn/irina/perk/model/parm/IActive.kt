@@ -1,4 +1,4 @@
-package cn.irina.perk.perks.parm
+package cn.irina.perk.model.parm
 
 import org.bukkit.entity.Player
 
