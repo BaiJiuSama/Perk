@@ -1,7 +1,7 @@
 package cn.irina.perk.perks.impl.active
 
 import cn.irina.perk.model.Perk
-import cn.irina.perk.perks.parm.IActive
+import cn.irina.perk.model.parm.IActive
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
 

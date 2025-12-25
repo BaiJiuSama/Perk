@@ -1,7 +1,7 @@
 package cn.irina.perk.perks.impl.attack
 
 import cn.irina.perk.model.Perk
-import cn.irina.perk.perks.parm.IAttack
+import cn.irina.perk.model.parm.IAttack
 import cn.irina.perk.util.DamageUtil
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
